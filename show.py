@@ -6,6 +6,7 @@ from config import api
 
 def main(file):
     result = api.get_page_details(file)
+    print(result.text)
     data = result.value
     content_data = data['CanvasContent1']
     soup = BeautifulSoup(content_data, 'html.parser')

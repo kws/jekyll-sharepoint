@@ -1,26 +1,34 @@
 import os
-from pathlib import Path
-
-import msal
 from dotenv import load_dotenv
-from msgraphy.auth.graph_auth import FileSystemTokenCache, InteractiveTokenWrapper
 from msgraphy.client.graph_client import RequestsGraphClient
 from msgraphy.sharepoint_classic import SharePointApi
+from office365.runtime.auth.providers.acs_token_provider import ACSTokenProvider
 
 load_dotenv()
 
-app = msal.PublicClientApplication(
+provider = ACSTokenProvider(
+    os.environ['ROOT_URL'],
     os.environ['SHAREPOINT_CLIENT_ID'],
-    authority=f"https://login.microsoftonline.com/{os.environ['SHAREPOINT_TENANT']}",
-    token_cache=FileSystemTokenCache(Path(__file__).parent / ".." / ".auth", save_on_exit=True),
+    os.environ['SHAREPOINT_CLIENT_SECRET']
 )
 
 
-client = RequestsGraphClient(InteractiveTokenWrapper(app, [
-    f"https://{os.environ['SHAREPOINT_HOSTNAME']}.sharepoint.com/AllSites.Read",
-    f"https://{os.environ['SHAREPOINT_HOSTNAME']}.sharepoint.com/AllSites.Write",
-]))
+class RequestWrapper:
 
+    def __init__(self):
+        self.header = {}
+
+    def set_header(self, header, value):
+        self.header[header] = value
+
+    def get_authorization_token(self):
+        return self.header['Authorization'].split(' ')[1]
+
+
+request = RequestWrapper()
+provider.authenticate_request(request)
+
+client = RequestsGraphClient(request.get_authorization_token)
 
 SITE_URL = os.environ['SITE_URL']
 SERVER_RELATIVE_URL = os.environ['SERVER_RELATIVE_URL']
