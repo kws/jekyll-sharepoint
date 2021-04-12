@@ -1,0 +1,18 @@
+[tool.poetry]
+name = "jekyll-sharepoint"
+version = "0.1.0"
+description = ""
+authors = ["Kaj Siebert <kaj@k-si.com>"]
+
+[tool.poetry.dependencies]
+python = "^3.9"
+msgraphy = { git = "https://github.com/kws/python-msgraphy.git", branch = "main" }
+PyYAML = "^5.4.1"
+python-dotenv = "^0.17.0"
+beautifulsoup4 = "^4.9.3"
+
+[tool.poetry.dev-dependencies]
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
