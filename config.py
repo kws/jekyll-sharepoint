@@ -7,7 +7,7 @@ from office365.runtime.auth.providers.acs_token_provider import ACSTokenProvider
 load_dotenv()
 
 provider = ACSTokenProvider(
-    os.environ['ROOT_URL'],
+    f"https://{os.environ['SHAREPOINT_HOSTNAME']}.sharepoint.com/",
     os.environ['SHAREPOINT_CLIENT_ID'],
     os.environ['SHAREPOINT_CLIENT_SECRET']
 )
@@ -30,8 +30,9 @@ provider.authenticate_request(request)
 
 client = RequestsGraphClient(request.get_authorization_token)
 
-SITE_URL = os.environ['SITE_URL']
-SERVER_RELATIVE_URL = os.environ['SERVER_RELATIVE_URL']
-LINK_PREFIX = os.environ['LINK_PREFIX']
+SITE_PREFIX = os.environ['SHAREPOINT_SITE']
+SITE_URL = f"https://{os.environ['SHAREPOINT_HOSTNAME']}.sharepoint.com{SITE_PREFIX}"
+SERVER_RELATIVE_URL = f"{SITE_PREFIX}/SitePages/"
+LINK_PREFIX = f"{SITE_URL}/SitePages/"
 
-api = SharePointApi(client, SITE_URL, SERVER_RELATIVE_URL)
+api = SharePointApi(client, f"{SITE_URL}/", SERVER_RELATIVE_URL)
