@@ -27,9 +27,9 @@ def upload_pages(folder):
         sharepoint.create_page(str(path), file.front_matter, file.html, overwrite=False)
 
 
-def upload_images(folder):
+def upload_images(folder, asset_path='SiteAssets', asset_list='Site Assets'):
     jekyll = JekyllSync(folder)
-    api = LocalApi(client, f"{SITE_URL}/", f"{SITE_PREFIX}/SiteAssets/")
+    api = LocalApi(client, f"{SITE_URL}/", f"{SITE_PREFIX}/{asset_path}/")
 
     # Get all image files that need to be uploaded
     files = jekyll.website_images()
@@ -38,11 +38,21 @@ def upload_images(folder):
         print("Creating", p)
         api.create_folder(p)
 
+    # Fetch file metadata
+    file_metadata = api.get_list(asset_list, property='files').value['value']
+    file_metadata = {m['Url']: m for m in file_metadata}
+
     for file in files:
         path = file.rel_path
-        print(f"Uploading {str(path)}")
-        with open(file.abs_path, 'rb') as FILE:
-            data = FILE.read()
+        est_url = f'{SITE_URL}/{asset_path}/{path}'
+
+        print(f"Uploading {str(path)}: {est_url}")
+        size = file_metadata.get(est_url, {}).get('Size', -1)
+        if size == file.abs_path.stat().st_size:
+            print(" * File size unchanged, skipping")
+            continue
+
+        data = file.abs_path.read_bytes()
         api.upload_file(path.parent, path.name, data)
 
 

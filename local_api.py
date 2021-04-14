@@ -9,14 +9,17 @@ class LocalApi(SharePointApi):
         self.__server_root = server_root
         super(LocalApi, self).__init__(client, site_root, server_root)
 
-    def get_list_items(self, list_name):
-        url = f"{self.__site_root}_api/web/lists/getByTitle('{list_name}')/items"
+    def get_list(self, list_name, property=''):
+        url = f"{self.__site_root}_api/web/lists/getByTitle('{list_name}')/{property}"
         response = self.__client.make_request(
             url=url,
             method="get",
             headers=dict(Accept="application/json")
         )
         return response
+
+    def get_list_items(self, list_name):
+        return self.get_list(list_name, property='items')
 
     def get_list_items_filenames(self, list_name):
         url = f"{self.__site_root}_api/web/lists/getByTitle('{list_name}')/items?" \

@@ -36,7 +36,6 @@ class JekyllSync:
             if not filename.is_file():
                 continue
             relative_filename = filename.relative_to(self._images)
-            print(relative_filename)
             all_files.append(ImageFile(abs_path=filename.absolute(), rel_path=relative_filename))
 
         return all_files
