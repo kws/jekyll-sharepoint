@@ -1,7 +1,5 @@
-import sys
-from difflib import context_diff, unified_diff
-
 from bs4 import BeautifulSoup
+from config import TEMPLATE_FILE
 
 
 class SharepointSync:
@@ -15,7 +13,7 @@ class SharepointSync:
         if not page_name.endswith('.aspx'):
             page_name = f'{page_name}.aspx'
 
-        self.api.copy_page('templates/_Template.aspx', page_name, overwrite=overwrite)
+        self.api.copy_page(TEMPLATE_FILE, page_name, overwrite=overwrite)
         response = self.api.get_page_details(page_name)
         e_tag = response.headers.get('ETag')
 

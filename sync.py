@@ -27,7 +27,7 @@ def upload_pages(folder):
         sharepoint.create_page(str(path), file.front_matter, file.html, overwrite=False)
 
 
-def upload_images(folder, asset_path='SiteAssets', asset_list='Site Assets'):
+def upload_images(folder, asset_path='Site Assets', asset_list='Site Assets'):
     jekyll = JekyllSync(folder)
     api = LocalApi(client, f"{SITE_URL}/", f"{SITE_PREFIX}/{asset_path}/")
 

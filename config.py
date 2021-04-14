@@ -32,3 +32,4 @@ client = RequestsGraphClient(request.get_authorization_token)
 SITE_PREFIX = os.environ['SHAREPOINT_SITE']
 SITE_URL = f"https://{os.environ['SHAREPOINT_HOSTNAME']}.sharepoint.com{SITE_PREFIX}"
 
+TEMPLATE_FILE = "_templates/Default.aspx"

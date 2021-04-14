@@ -13,7 +13,7 @@ def remove_double_slash(value):
 
 class SharepointHtml:
 
-    def __init__(self, site_url, site_dir='SitePages', asset_dir='SiteAssets'):
+    def __init__(self, site_url, site_dir='SitePages', asset_dir='Site Assets'):
         self.link_prefix = f"{site_url}/{site_dir}/"
         self.asset_prefix = f"{site_url}/{asset_dir}/"
 
