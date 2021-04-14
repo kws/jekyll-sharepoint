@@ -9,7 +9,7 @@ def main(file):
     print(result.text)
     data = result.value
     content_data = data['CanvasContent1']
-    soup = BeautifulSoup(content_data, 'html.parser')
+    soup = BeautifulSoup(content_data, 'sharepoint_html.parser')
     for div in soup.find_all('div'):
         if control_data := div.get('data-sp-controldata'):
             div['data-sp-controldata'] = '@data@'

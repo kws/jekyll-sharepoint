@@ -1,71 +1,56 @@
 #!/usr/bin/env python
-import re
 import sys
-from pathlib import Path
-from bs4 import BeautifulSoup
-from config import api, LINK_PREFIX
+
+from config import client, SITE_URL, SITE_PREFIX
+from sharepoint_html import SharepointHtml
+from local_api import LocalApi
+from sync.jekyll import JekyllSync
+from sync.sharepoint import SharepointSync
 
 
-def create_page(page_name, front_matter, html):
-    if not page_name.endswith('.aspx'):
-        page_name = f'{page_name}.aspx'
+def upload_pages(folder):
+    html = SharepointHtml(SITE_PREFIX)
+    jekyll = JekyllSync(folder, html_gen=html.convert_html)
+    api = LocalApi(client, f"{SITE_URL}/", f"{SITE_PREFIX}/SitePages/")
+    sharepoint = SharepointSync(api)
 
-    response = api.copy_page('templates/_Template.aspx', page_name, overwrite=True)
-    response = api.get_page_details(page_name)
-    e_tag = response.headers.get('ETag')
+    # Get all HTML files that need to be uploaded
+    files = jekyll.website_files()
+    folders = jekyll.get_file_folders(files)
+    for p in folders:
+        print("Creating", p)
+        api.create_folder(p)
 
-    data = response.value
-    if title := front_matter.get('title'):
-        data['Title'] = title
-
-    content_data = data['CanvasContent1']
-
-    content_data = re.sub(
-        r'<div data-sp-rte="">.*?</div>',
-        f'<div data-sp-rte="">{html}</div>',
-        content_data
-    )
-    data['CanvasContent1'] = content_data
-    data = {k: v for k, v in data.items() if v is not None}
-    response = api.update_page(page_name, e_tag, data)
-    response = api.publish(page_name)
+    for file in files:
+        path = file.rel_path
+        print(f"Uploading {str(path)}")
+        sharepoint.create_page(str(path), file.front_matter, file.html, overwrite=False)
 
 
-def upload_file(file, front_matter, html):
-    create_page(file.stem, front_matter, html)
+def upload_images(folder):
+    jekyll = JekyllSync(folder)
+    api = LocalApi(client, f"{SITE_URL}/", f"{SITE_PREFIX}/SiteAssets/")
 
+    # Get all image files that need to be uploaded
+    files = jekyll.website_images()
+    folders = jekyll.get_file_folders(files)
+    for p in folders:
+        print("Creating", p)
+        api.create_folder(p)
 
-def convert_html(html):
-    soup = BeautifulSoup(html, 'html.parser')
-    for a in soup.find_all('a'):
-        if not (href := a['href']).startswith('http'):
-            href = f'{LINK_PREFIX}{href.replace(".html", ".aspx")}'
-        a['data-cke-saved-href'] = a['href']
-        a['data-interception'] = 'on'
-        a['title'] = a['href']
-        a['href'] = href
-
-    output = "".join([c.prettify() for c in soup.find('div', id='bodycontent').children if hasattr(c, 'prettify')])
-
-    front_matter = {}
-    if title := soup.find('title'):
-        front_matter['title'] = title.text
-
-    return output, front_matter
+    for file in files:
+        path = file.rel_path
+        print(f"Uploading {str(path)}")
+        with open(file.abs_path, 'rb') as FILE:
+            data = FILE.read()
+        api.upload_file(path.parent, path.name, data)
 
 
 def main(folder):
-    file_list = Path(folder).glob("*.html")
-    for filename in file_list:
-        if filename.name == '404.html':
-            continue
-        with open(filename, 'rt') as file:
-            html = file.read()
-
-        html, front_matter = convert_html(html)
-        print(html)
-        upload_file(filename, front_matter, html)
+    upload_pages(folder)
+    upload_images(folder)
 
 
 if __name__ == '__main__':
-    main(sys.argv[1])
+    folder = sys.argv[1]
+    main(folder)
