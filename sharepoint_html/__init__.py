@@ -1,3 +1,6 @@
+from pathlib import Path
+from urllib.parse import urlparse
+
 from bs4 import BeautifulSoup
 import re
 
@@ -14,14 +17,20 @@ class SharepointHtml:
         self.link_prefix = f"{site_url}/{site_dir}/"
         self.asset_prefix = f"{site_url}/{asset_dir}/"
 
-    def convert_html(self, html):
+    def convert_html(self, html, rel_path):
         soup = BeautifulSoup(html, 'html.parser')
         ptn_start = re.compile(r'^https?')
         ptn_ext = re.compile(r'.html?$')
         for a in soup.find_all('a'):
             href = a['href']
             if not ptn_start.search(href):
-                href = f'{self.link_prefix}/{href}'
+                path = Path(rel_path).parent / Path(href)
+                # Attempt to simplify path
+                try:
+                    path = path.resolve(strict=False).relative_to(Path().resolve())
+                except ValueError:
+                    pass
+                href = f'{self.link_prefix}/{path}'
             href = ptn_ext.sub('.aspx', href)
             href = remove_double_slash(href)
 

@@ -22,7 +22,7 @@ class JekyllSync:
                 html = file.read()
 
             if self._html_gen:
-                html, front_matter = self._html_gen(html)
+                html, front_matter = self._html_gen(html, relative_filename)
             else:
                 front_matter = dict()
             all_files.append(HtmlFile(abs_path=filename.absolute(), rel_path=relative_filename,
