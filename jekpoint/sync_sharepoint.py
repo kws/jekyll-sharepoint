@@ -1,11 +1,11 @@
 from bs4 import BeautifulSoup
-from config import TEMPLATE_FILE
 
 
 class SharepointSync:
 
-    def __init__(self, api):
+    def __init__(self, api, config):
         self.api = api
+        self.config = config
 
     def create_page(self, page_name, front_matter, html, overwrite=False):
         if page_name.endswith('.html'):
@@ -13,7 +13,7 @@ class SharepointSync:
         if not page_name.endswith('.aspx'):
             page_name = f'{page_name}.aspx'
 
-        self.api.copy_page(TEMPLATE_FILE, page_name, overwrite=overwrite)
+        self.api.copy_page(self.config.template_file, page_name, overwrite=overwrite)
         response = self.api.get_page_details(page_name)
         e_tag = response.headers.get('ETag')
 

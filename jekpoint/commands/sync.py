@@ -1,18 +1,25 @@
-#!/usr/bin/env python
-import sys
-
-from config import client, SITE_URL, SITE_PREFIX
-from sharepoint_html import SharepointHtml
-from local_api import LocalApi
-from sync.jekyll import JekyllSync
-from sync.sharepoint import SharepointSync
+from jekpoint.html import SharepointHtml
+from jekpoint.api import SharePointApi
+from jekpoint.sync_jekyll import JekyllSync
+from jekpoint.sync_sharepoint import SharepointSync
 
 
-def upload_pages(folder):
-    html = SharepointHtml(SITE_PREFIX)
+def add_arguments(parser):
+    parser.add_argument('folder', type=str, help='The folder to synchronise from')
+
+
+def run(args, config):
+    upload_pages(args.folder, config)
+    upload_images(args.folder, config)
+
+
+def upload_pages(folder, config):
+    html = SharepointHtml(config.site_prefix)
     jekyll = JekyllSync(folder, html_gen=html.convert_html)
-    api = LocalApi(client, f"{SITE_URL}/", f"{SITE_PREFIX}/SitePages/")
-    sharepoint = SharepointSync(api)
+    api = SharePointApi(config.client,
+                        f"{config.site_url}{config.site_prefix}/",
+                        f"{config.site_prefix}/{config.site_pages}/")
+    sharepoint = SharepointSync(api, config)
 
     # Get all HTML files that need to be uploaded
     files = jekyll.website_files()
@@ -27,9 +34,11 @@ def upload_pages(folder):
         sharepoint.create_page(str(path), file.front_matter, file.html, overwrite=False)
 
 
-def upload_images(folder, asset_path='Site Assets', asset_list='Site Assets'):
+def upload_images(folder, config):
     jekyll = JekyllSync(folder)
-    api = LocalApi(client, f"{SITE_URL}/", f"{SITE_PREFIX}/{asset_path}/")
+    api = SharePointApi(config.client,
+                        f"{config.site_url}{config.site_prefix}/",
+                        f"{config.site_prefix}/{config.site_assets}/")
 
     # Get all image files that need to be uploaded
     files = jekyll.website_images()
@@ -39,12 +48,12 @@ def upload_images(folder, asset_path='Site Assets', asset_list='Site Assets'):
         api.create_folder(p)
 
     # Fetch file metadata
-    file_metadata = api.get_list(asset_list, property='files').value['value']
+    file_metadata = api.get_list(config.site_assets_list, property='files').value['value']
     file_metadata = {m['Url']: m for m in file_metadata}
 
     for file in files:
         path = file.rel_path
-        est_url = f'{SITE_URL}/{asset_path}/{path}'
+        est_url = f'{config.site_url}{config.site_prefix}/{config.site_assets}/{path}'
 
         print(f"Uploading {str(path)}: {est_url}")
         size = file_metadata.get(est_url, {}).get('Size', -1)
@@ -56,11 +65,4 @@ def upload_images(folder, asset_path='Site Assets', asset_list='Site Assets'):
         api.upload_file(path.parent, path.name, data)
 
 
-def main(folder):
-    upload_pages(folder)
-    upload_images(folder)
 
-
-if __name__ == '__main__':
-    folder = sys.argv[1]
-    main(folder)
