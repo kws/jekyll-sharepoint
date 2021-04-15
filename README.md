@@ -27,12 +27,19 @@ Use Office365-REST-Python-Client
 
 Register new app:
 
+```
 https://<tenant>.sharepoint.com/sites/<sitename>/_layouts/15/appregnew.aspx
+```
 
 Then grant permissions:
 
+```
 https://<tenant>.sharepoint.com/sites/<sitename>/_layouts/15/appinv.aspx
+```
 
+Set the following policy:
+```
 <AppPermissionRequests AllowAppOnlyPolicy="true">
   <AppPermissionRequest Scope="http://sharepoint/content/sitecollection/web" Right="FullControl" />
 </AppPermissionRequests>
+```
