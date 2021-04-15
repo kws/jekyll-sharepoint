@@ -1,3 +1,19 @@
+from typing import Callable
+import requests
+
+
+class AuthorisingClient:
+    def __init__(self, token_fetcher: Callable):
+        self.__token_fetcher = token_fetcher
+
+    def make_request(self, url, method="get", headers=None, use_auth=True, **kwargs):
+        if use_auth:
+            headers = headers if headers else {}
+            headers = {**headers, "Authorization": f'Bearer {self.__token_fetcher()}'}
+
+        return requests.request(method, url, headers=headers, **kwargs)
+
+
 class SharePointApi:
 
     def __init__(self, client, site_root, server_root):

@@ -6,12 +6,12 @@ authors = ["Kaj Siebert <kaj@k-si.com>"]
 
 [tool.poetry.dependencies]
 python = "^3.9"
-msgraphy = { git = "https://github.com/kws/python-msgraphy.git", branch = "main" }
 PyYAML = "^5.4.1"
 python-dotenv = "^0.17.0"
 beautifulsoup4 = "^4.9.3"
 adal = "^1.2.7"
 Office365-REST-Python-Client = "^2.3.2"
+pyhumps = "^1.6.1"
 
 [tool.poetry.dev-dependencies]
 

@@ -48,7 +48,8 @@ def upload_images(folder, config):
         api.create_folder(p)
 
     # Fetch file metadata
-    file_metadata = api.get_list(config.site_assets_list, property='files').value['value']
+    file_metadata = api.get_list(config.site_assets_list, property='files')
+    file_metadata = file_metadata.json()['value']
     file_metadata = {m['Url']: m for m in file_metadata}
 
     for file in files:

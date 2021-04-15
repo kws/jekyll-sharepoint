@@ -17,7 +17,7 @@ class SharepointSync:
         response = self.api.get_page_details(page_name)
         e_tag = response.headers.get('ETag')
 
-        data = response.value
+        data = response.json()
         if title := front_matter.get('title'):
             data['Title'] = title
 
@@ -45,12 +45,12 @@ class SharepointSync:
         data = {k: v for k, v in data.items() if v is not None}
 
         response = self.api.update_page(page_name, e_tag, data)
-        print(f" * Uploaded {page_name}: {response.response.status_code}")
+        print(f" * Uploaded {page_name}: {response.status_code}")
         if not response.ok:
             print(response.text)
 
         response = self.api.publish(page_name)
-        print(f" * Published {page_name}: {response.response.status_code}")
+        print(f" * Published {page_name}: {response.status_code}")
         if not response.ok:
             print(response.text)
 

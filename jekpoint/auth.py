@@ -1,7 +1,8 @@
 import os
 
-from msgraphy.client.graph_client import RequestsGraphClient
 from office365.runtime.auth.providers.acs_token_provider import ACSTokenProvider
+
+from jekpoint.api import AuthorisingClient
 
 
 class FakeRequest:
@@ -26,4 +27,4 @@ def get_authorised_client(config):
     )
     request = FakeRequest()
     provider.authenticate_request(request)
-    return RequestsGraphClient(request.get_authorization_token)
+    return AuthorisingClient(request.get_authorization_token)
