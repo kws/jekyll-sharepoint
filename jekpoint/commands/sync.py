@@ -81,10 +81,11 @@ def get_jinja_template(template, config):
     # If the path provided is a file, then we configure the a filesystem loader relative to that file
     template = Path(template)
     if template.is_file():
-        fs_loader = FileSystemLoader(template.parent)
+        fs_loader = FileSystemLoader(str(template.parent.resolve()))
         template = template.name
     else:
-        fs_loader = FileSystemLoader(template)
+        fs_loader = FileSystemLoader()
+        template = str(template.resolve())
 
     p_loader = PackageLoader("jekpoint")
     loader = ChoiceLoader([fs_loader, p_loader])
