@@ -1,3 +1,5 @@
+import hashlib
+
 from bs4 import BeautifulSoup
 
 
@@ -29,13 +31,15 @@ class SharepointSync:
             print(" * Container not found")
             return
 
-        old_version = div.prettify()
+        old_hash = div.attrs.get('data-checksum')
+        new_hash = hashlib.sha256(html.encode('utf-8')).hexdigest()
 
         div.clear()
         div.append(BeautifulSoup(html, 'html.parser'))
+        div.attrs['data-checksum'] = new_hash
 
         new_version = div.prettify()
-        if old_version == new_version:
+        if old_hash == new_hash:
             print(" * No changes detected")
             return
 
