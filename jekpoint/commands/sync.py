@@ -84,7 +84,7 @@ def get_jinja_template(template, config):
         fs_loader = FileSystemLoader(str(template.parent.resolve()))
         template = template.name
     else:
-        fs_loader = FileSystemLoader()
+        fs_loader = FileSystemLoader(str(Path().resolve()))
         template = str(template.resolve())
 
     p_loader = PackageLoader("jekpoint")
