@@ -1,3 +1,8 @@
+from pathlib import Path
+
+from jinja2 import ChoiceLoader, FileSystemLoader, PackageLoader
+from jinja2 import Environment, select_autoescape
+
 from jekpoint.html import SharepointHtml
 from jekpoint.api import SharePointApi
 from jekpoint.sync_jekyll import JekyllSync
@@ -6,15 +11,21 @@ from jekpoint.sync_sharepoint import SharepointSync
 
 def add_arguments(parser):
     parser.add_argument('folder', type=str, help='The folder to synchronise from')
+    parser.add_argument('--template', '-t', type=str, metavar='FILE',
+                        help='A Jinja template for rendering the output')
 
 
 def run(args, config):
-    upload_pages(args.folder, config)
+    if args.template:
+        template = get_jinja_template(args.template, config)
+    else:
+        template = None
+    upload_pages(args.folder, config, template=template)
     upload_images(args.folder, config)
 
 
-def upload_pages(folder, config):
-    html = SharepointHtml(config.site_prefix)
+def upload_pages(folder, config, template=None):
+    html = SharepointHtml(config.site_prefix, template=template)
     jekyll = JekyllSync(folder, html_gen=html.convert_html)
     api = SharePointApi(config.client,
                         f"{config.site_url}{config.site_prefix}/",
@@ -66,4 +77,21 @@ def upload_images(folder, config):
         api.upload_file(path.parent, path.name, data)
 
 
+def get_jinja_template(template, config):
+    # If the path provided is a file, then we configure the a filesystem loader relative to that file
+    template = Path(template)
+    if template.is_file():
+        fs_loader = FileSystemLoader(template.parent)
+        template = template.name
+    else:
+        fs_loader = FileSystemLoader(template)
+
+    p_loader = PackageLoader("jekpoint")
+    loader = ChoiceLoader([fs_loader, p_loader])
+    env = Environment(
+        loader=loader,
+        autoescape=select_autoescape(['html', 'xml']),
+    )
+    env.globals['config'] = config
+    return env.get_template(template)
 

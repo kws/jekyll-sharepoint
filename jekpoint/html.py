@@ -4,6 +4,8 @@ from urllib.parse import urlparse
 from bs4 import BeautifulSoup
 import re
 
+from markupsafe import Markup
+
 __pattern = re.compile(r'([^:])//+')
 
 
@@ -13,9 +15,10 @@ def remove_double_slash(value):
 
 class SharepointHtml:
 
-    def __init__(self, site_url, site_dir='SitePages', asset_dir='Site Assets'):
+    def __init__(self, site_url, site_dir='SitePages', asset_dir='Site Assets', template=None):
         self.link_prefix = f"{site_url}/{site_dir}/"
         self.asset_prefix = f"{site_url}/{asset_dir}/"
+        self.template = template
 
     def convert_html(self, html, rel_path):
         soup = BeautifulSoup(html, 'html.parser')
@@ -50,5 +53,9 @@ class SharepointHtml:
         front_matter = {}
         if title := soup.find('title'):
             front_matter['title'] = title.text
+
+        if self.template:
+            output = self.template.render(body=Markup(output), front_matter=front_matter,
+                                          link_prefix=self.link_prefix, asset_prefix=self.asset_prefix)
 
         return output, front_matter
