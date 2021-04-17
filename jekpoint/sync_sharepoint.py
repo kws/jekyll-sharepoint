@@ -38,7 +38,6 @@ class SharepointSync:
         div.append(BeautifulSoup(html, 'html.parser'))
         div.attrs['data-checksum'] = new_hash
 
-        new_version = div.prettify()
         if old_hash == new_hash:
             print(" * No changes detected")
             return
