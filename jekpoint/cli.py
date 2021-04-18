@@ -9,7 +9,7 @@ def main(*args, exe_name):
     parser = argparse.ArgumentParser(description='JekPoint CLI')
     parser.add_argument('command', type=str, help='The command to run.')
 
-    if len(args) == 0 or '-h' in args:
+    if len(args) == 0:
         parser.print_help()
         exit()
 

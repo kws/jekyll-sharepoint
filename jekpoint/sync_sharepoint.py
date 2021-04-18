@@ -9,7 +9,7 @@ class SharepointSync:
         self.api = api
         self.config = config
 
-    def create_page(self, page_name, front_matter, html, overwrite=False):
+    def create_page(self, page_name, front_matter, html, overwrite=False, force=False):
         if page_name.endswith('.html'):
             page_name = page_name[:-5]
         if not page_name.endswith('.aspx'):
@@ -38,11 +38,11 @@ class SharepointSync:
         div.append(BeautifulSoup(html, 'html.parser'))
         div.attrs['data-checksum'] = new_hash
 
-        if old_hash == new_hash:
+        if not force and old_hash == new_hash:
             print(" * No changes detected")
             return
 
-        content_data = soup.prettify()
+        content_data = str(soup)
 
         data['CanvasContent1'] = content_data
         data = {k: v for k, v in data.items() if v is not None}

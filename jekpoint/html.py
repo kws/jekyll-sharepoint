@@ -48,7 +48,7 @@ class SharepointHtml:
             src = remove_double_slash(src)
             img['src'] = src
 
-        output = "".join([c.prettify() for c in soup.find('div', id='bodycontent').children if hasattr(c, 'prettify')])
+        output = "".join([str(c) for c in soup.find('div', id='bodycontent').children])
 
         front_matter = {}
         if title := soup.find('title'):

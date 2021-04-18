@@ -13,6 +13,12 @@ def add_arguments(parser):
     parser.add_argument('folder', type=str, help='The folder to synchronise from')
     parser.add_argument('--template', '-t', type=str, metavar='FILE',
                         help='A Jinja template for rendering the output')
+    parser.add_argument('--show', '-s', action='store_true',
+                        help='Show the HTML output as it\'s written')
+    parser.add_argument('--dry-run', action='store_true',
+                        help="Run generation, but don't upload files")
+    parser.add_argument('--force', '-f', action='store_true',
+                        help="Force upload even if not changed.")
 
 
 def run(args, config):
@@ -20,11 +26,12 @@ def run(args, config):
         template = get_jinja_template(args.template, config)
     else:
         template = None
-    upload_pages(args.folder, config, template=template)
-    upload_images(args.folder, config)
+    upload_pages(args.folder, config, template=template, show=args.show, dry_run=args.dry_run,
+                 force=args.force)
+    upload_images(args.folder, config, dry_run=args.dry_run)
 
 
-def upload_pages(folder, config, template=None):
+def upload_pages(folder, config, template=None, show=False, dry_run=False, force=False):
     html = SharepointHtml(config.site_prefix, template=template)
     jekyll = JekyllSync(folder, html_gen=html.convert_html)
     api = SharePointApi(config.client,
@@ -42,10 +49,13 @@ def upload_pages(folder, config, template=None):
     for file in files:
         path = file.rel_path
         print(f"Uploading {str(path)}")
-        sharepoint.create_page(str(path), file.front_matter, file.html, overwrite=False)
+        if show:
+            print(file.html)
+        if not dry_run:
+            sharepoint.create_page(str(path), file.front_matter, file.html, overwrite=False, force=force)
 
 
-def upload_images(folder, config):
+def upload_images(folder, config, dry_run=False):
     jekyll = JekyllSync(folder)
     api = SharePointApi(config.client,
                         f"{config.site_url}{config.site_prefix}/",
@@ -74,7 +84,8 @@ def upload_images(folder, config):
             continue
 
         data = file.abs_path.read_bytes()
-        api.upload_file(path.parent, path.name, data)
+        if not dry_run:
+            api.upload_file(path.parent, path.name, data)
 
 
 def get_jinja_template(template, config):
