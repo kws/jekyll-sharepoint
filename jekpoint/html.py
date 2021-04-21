@@ -33,9 +33,16 @@ class SharepointHtml:
                     path = path.resolve(strict=False).relative_to(Path().resolve())
                 except ValueError:
                     pass
+
+                # This is a very special case - the index/home page of a sharepoint site is actually
+                # one folder higher than the rest of the site.
+                if str(path) == "/":
+                    path = "../"
+
                 href = f'{self.link_prefix}/{path}'
             href = ptn_ext.sub('.aspx', href)
             href = remove_double_slash(href)
+            print(href)
 
             a['data-cke-saved-href'] = a['href']
             a['data-interception'] = 'on'
