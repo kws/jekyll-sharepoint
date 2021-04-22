@@ -42,7 +42,6 @@ class SharepointHtml:
                 href = f'{self.link_prefix}/{path}'
             href = ptn_ext.sub('.aspx', href)
             href = remove_double_slash(href)
-            print(href)
 
             a['data-cke-saved-href'] = a['href']
             a['data-interception'] = 'on'
