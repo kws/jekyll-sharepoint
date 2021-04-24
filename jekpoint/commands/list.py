@@ -10,6 +10,8 @@ def add_arguments(parser):
 
 
 def dump_result(filename, result):
+    if hasattr(result, 'json'):
+        result = result.json()
     with open(filename, 'wt') as file:
         json.dump(result, file, indent=4, sort_keys=True)
 
@@ -22,16 +24,16 @@ def run(args, config):
     list_name = args.list_name
 
     result = api.get_list_items(list_name)
-    dump_result('examples/list_items.json', result.value)
+    dump_result('examples/list_items.json', result)
 
     result = api.get_list(list_name, property='files')
-    dump_result('examples/list_files.json', result.value)
+    dump_result('examples/list_files.json', result)
 
     result = api.get_list_items_filenames(list_name)
-    dump_result('examples/list_items_filenames.json', result.value)
+    dump_result('examples/list_items_filenames.json', result)
 
     result = api.get_list_stream(list_name)
-    dump_result('examples/list_as_stream.json', result.value)
+    dump_result('examples/list_as_stream.json', result)
 
     result = api.get_list_stream_all(list_name)
     dump_result('examples/list_as_stream_all.json', result)
