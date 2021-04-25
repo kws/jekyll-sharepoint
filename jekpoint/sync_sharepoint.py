@@ -9,13 +9,10 @@ class SharepointSync:
         self.api = api
         self.config = config
 
-    def create_page(self, page_name, front_matter, html, overwrite=False, force=False):
-        if page_name.endswith('.html'):
-            page_name = page_name[:-5]
-        if not page_name.endswith('.aspx'):
-            page_name = f'{page_name}.aspx'
-
+    def create_page(self, page_name, overwrite=False):
         self.api.copy_page(self.config.template_file, page_name, overwrite=overwrite)
+
+    def update_page(self, page_name, front_matter, html, checksum):
         response = self.api.get_page_details(page_name)
         e_tag = response.headers.get('ETag')
 
@@ -31,20 +28,11 @@ class SharepointSync:
             print(" * Container not found")
             return
 
-        old_hash = div.attrs.get('data-checksum')
-        new_hash = hashlib.sha256(html.encode('utf-8')).hexdigest()
-
         div.clear()
         div.append(BeautifulSoup(html, 'html.parser'))
-        div.attrs['data-checksum'] = new_hash
+        div.attrs['data-checksum'] = checksum
 
-        if not force and old_hash == new_hash:
-            print(" * No changes detected")
-            return
-
-        content_data = str(soup)
-
-        data['CanvasContent1'] = content_data
+        data['CanvasContent1'] = str(soup)
         data = {k: v for k, v in data.items() if v is not None}
 
         response = self.api.update_page(page_name, e_tag, data)

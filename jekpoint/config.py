@@ -32,7 +32,8 @@ class Config:
 
         self.template_file = "_templates/Default.aspx"
         self.site_pages = os.getenv("SHAREPOINT_SITE_PAGES", "SitePages")
-        self.site_pages_list = os.getenv("SHAREPOINT_SITE_PAGES_LIST", self.site_pages)
+        self.site_pages_list = os.getenv("SHAREPOINT_SITE_PAGES_LIST",
+                                         "Site Pages" if self.site_pages == "SitePages" else self.site_pages)
 
         self.site_assets = os.getenv("SHAREPOINT_SITE_ASSETS", "Site Assets")
         self.site_assets_list = os.getenv("SHAREPOINT_SITE_ASSETS_LIST", self.site_assets)

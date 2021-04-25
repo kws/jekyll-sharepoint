@@ -24,15 +24,19 @@ def run(args, config):
     list_name = args.list_name
 
     result = api.get_list_items(list_name)
+    result.raise_for_status()
     dump_result('examples/list_items.json', result)
 
     result = api.get_list(list_name, property='files')
+    result.raise_for_status()
     dump_result('examples/list_files.json', result)
 
     result = api.get_list_items_filenames(list_name)
+    result.raise_for_status()
     dump_result('examples/list_items_filenames.json', result)
 
     result = api.get_list_stream(list_name)
+    result.raise_for_status()
     dump_result('examples/list_as_stream.json', result)
 
     result = api.get_list_stream_all(list_name)

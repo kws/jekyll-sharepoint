@@ -47,7 +47,6 @@ class SharePointApi:
         # FormPage.The value = 2.
         url = f"{self.__site_root}_api/web/GetFolderByServerRelativeUrl('{self.__server_root}{folder}')/Files/" \
               f"AddTemplateFile(urlOfFile='{self.__server_root}{page_name}',templateFileType={template_file_type})"
-        print(url)
         response = self.__client.make_request(
             url=url,
             method="post",
@@ -100,10 +99,11 @@ class SharePointApi:
         )
         return response
 
-    def get_list(self, list_name, property=''):
+    def get_list(self, list_name, property='', params=None):
         url = f"{self.__site_root}_api/web/lists/getByTitle('{list_name}')/{property}"
         response = self.__client.make_request(
             url=url,
+            params=params,
             method="get",
             headers=dict(Accept="application/json")
         )
@@ -135,10 +135,10 @@ class SharePointApi:
         return response
 
     def get_list_stream_all(self, list_name, render_options=0):
-        result = self.get_list_stream(list_name).value
+        result = self.get_list_stream(list_name, render_options=render_options).json()
         results = [] + result.get("Row", [])
         while 'NextHref' in result:
-            result = self.get_list_stream(list_name, paging=result['NextHref']).value
+            result = self.get_list_stream(list_name, render_options=render_options, paging=result['NextHref']).json()
             results += result.get("Row", [])
 
         return results
